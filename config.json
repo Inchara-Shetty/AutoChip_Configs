@@ -1,7 +1,7 @@
 {
 	"general": {
         "prompt": "./half_adder.sv",
-        "name": "half_adder",
+        "name": "top_module",
         "testbench": "./half_adder_tb.v",
 		"model_family": "ChatGPT",
 		"model_id": "gpt-4o-mini",

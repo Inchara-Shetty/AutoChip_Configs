@@ -1,8 +1,8 @@
 {
 	"general": {
-        "prompt": "./sram.v",
-        "name": "sram",
-        "testbench": "./sram_tb.v",
+        "prompt": "./half_adder.sv",
+        "name": "half_adder",
+        "testbench": "./half_adder_tb.v",
 		"model_family": "ChatGPT",
 		"model_id": "gpt-4o-mini",
 		"num_candidates": 5,

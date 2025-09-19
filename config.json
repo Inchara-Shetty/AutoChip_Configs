@@ -1,8 +1,8 @@
 {
 	"general": {
-        "prompt": "./dice_roller.v",
-        "name": "dice_roller",
-        "testbench": "./dice_roller_tb.v",
+        "prompt": "./sram.v",
+        "name": "sram",
+        "testbench": "./sram_tb.v",
 		"model_family": "ChatGPT",
 		"model_id": "gpt-4o-mini",
 		"num_candidates": 5,

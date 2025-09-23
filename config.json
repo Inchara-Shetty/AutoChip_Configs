@@ -1,13 +1,13 @@
 {
 	"general": {
-        "prompt": "./half_adder.sv",
+        "prompt": "./dice_roller.sv",
         "name": "top_module",
-        "testbench": "./half_adder_tb.v",
+        "testbench": "./dice_roller_tb.sv",
 		"model_family": "ChatGPT",
 		"model_id": "gpt-4o-mini",
 		"num_candidates": 5,
 		"iterations": 5,
-        "outdir": "outputs_rule90",
+        "outdir": "outputs_dice_roller",
         "log": "log.txt",
 		"ensemble": false
     }

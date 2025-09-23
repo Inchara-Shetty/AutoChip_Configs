@@ -1,61 +1,6 @@
-`timescale 1 ps/1 ps
-module dice_roller (
-    input wire clk,
-    input wire rst_n,
-    input wire [1:0] die_select,  // 00: 4-sided, 01: 6-sided, 10: 8-sided, 11: 20-sided
-    input wire roll,
-    output reg [7:0] rolled_number  // Outputs the rolled number (up to 8 bits)
-);
-
-// State definitions
-reg [3:0] max_sides;  // Maximum number of sides based on die selection
-reg rolling;          // Rolling flag to indicate if we are currently rolling
-
-// Random number generation using a simple linear feedback shift register (LFSR) or a dice logic
-reg [7:0] random_number; // Random number generated
-
-// Instantiate a simple LFSR for random number generation
-always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
-        random_number <= 8'b0;  // Reset random number
-        rolled_number <= 8'b0;   // Reset rolled number
-        rolling <= 1'b0;         // Reset rolling flag
-    end else begin
-        // Update the random number using a simple LFSR
-        random_number <= {random_number[6:0], random_number[7] ^ random_number[5] ^ random_number[4] ^ random_number[3]}; 
-    end
-end
-
-// Update max_sides based on die_select
-always @(*) begin
-    case (die_select)
-        2'b00: max_sides = 4;   // 4-sided die
-        2'b01: max_sides = 6;   // 6-sided die
-        2'b10: max_sides = 8;   // 8-sided die
-        2'b11: max_sides = 20;  // 20-sided die
-        default: max_sides = 4; // Default to 4-sided if invalid
-    endcase
-end
-
-// Rolling logic, roll when roll signal is high
-always @(posedge clk) begin
-    if (roll && !rolling) begin
-        rolling <= 1'b1; // Set rolling state
-        // Output a rolled number based on the selected die
-        rolled_number <= (random_number % max_sides) + 1; // Calculate rolled number
-    end else if (!roll) begin
-        rolling <= 1'b0; // Reset rolling state when roll is de-asserted
-    end
-end
-
-
-endmodule
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 `timescale 1ns / 1ps
 
-module tb_dice_roller();
+module tb();
     reg clk;
     reg rst_n;
     reg [1:0] die_select;
@@ -164,7 +109,7 @@ module tb_dice_roller();
 reg vcd_clk;
 initial begin
     $dumpfile("my_design.vcd");
-    $dumpvars(0, tb_dice_roller);
+    $dumpvars(0, tb);
 end
 
 always #5 vcd_clk = ~vcd_clk; // Toggle clock every 5 time units

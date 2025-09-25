@@ -1,41 +1,6 @@
-module sram (
-    input         clk,         // System clock
-    input         cs,          // Chip select (active high)
-    input [5:0]  ramaddr,     // 6-bit address input
-    input [7:0]  ramin,       // 8-bit data input
-    input         rwbar,       // Read/write control (active low = write, high = read)
-    output reg [7:0] ramout    // 8-bit data output
-);
-
-    // Memory array declaration (64 x 8)
-    reg [7:0] memory [63:0];
-    reg [5:0] addr_reg;        // Register to latch the address
-
-    always @(posedge clk) begin
-        if (!cs) begin
-            // Chip select inactive, output zero
-            ramout <= 8'b0;
-        end else begin
-            // Chip select active
-            if (!rwbar) begin
-                // Write operation
-                memory[ramaddr] <= ramin;
-            end else begin
-                // Read operation
-                addr_reg <= ramaddr; // Latch the address
-                ramout <= memory[addr_reg]; // Output the data stored at the latched address
-            end
-        end
-    end
-endmodule
-```
-
-/// SRAM Testbench (`sram_tb.v`)
-
-
 `timescale 1ns/1ps
 
-module sram_tb;
+module tb;
     reg clk;                   // System clock
     reg cs;                    // Chip select
     reg [5:0] ramaddr;        // Address input

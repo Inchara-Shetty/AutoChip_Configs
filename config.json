@@ -1,13 +1,13 @@
 {
 	"general": {
-        "prompt": "./dice_roller.v",
+        "prompt": "./sram.v",
         "name": "top_module",
-        "testbench": "./dice_roller_tb.v",
+        "testbench": "./sram_tb.v",
 		"model_family": "ChatGPT",
 		"model_id": "gpt-4o-mini",
 		"num_candidates": 5,
 		"iterations": 5,
-        "outdir": "outputs_dice_roller",
+        "outdir": "outputs_sram",
         "log": "log.txt",
 		"ensemble": false
     }

@@ -65,5 +65,9 @@ module tb;
         
         // End of test
         $finish;
+
+        
+$display("All test cases passed!");
+
     end
 endmodule

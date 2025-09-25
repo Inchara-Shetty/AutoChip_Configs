@@ -1,73 +1,112 @@
 `timescale 1ns/1ps
 
 module tb;
-    reg clk;                   // System clock
-    reg cs;                    // Chip select
-    reg [5:0] ramaddr;        // Address input
-    reg [7:0] ramin;          // Data input
-    reg rwbar;                // Read/write control
-    wire [7:0] ramout;        // Data output
 
-    // Instantiate the SRAM module
-    sram uut (
-        .clk(clk),
-        .cs(cs),
-        .ramaddr(ramaddr),
-        .ramin(ramin),
-        .rwbar(rwbar),
-        .ramout(ramout)
-    );
+  // DUT signals
+  reg        clk;
+  reg        cs;
+  reg [5:0]  ramaddr;
+  reg [7:0]  ramin;
+  reg        rwbar;      // 0 = write, 1 = read
+  wire [7:0] ramout;
 
-    // Clock generation
-    initial begin
-        clk = 0;
-        forever #5 clk = ~clk; // 10ns clock period
+  // Instantiate DUT
+  sram dut (
+    .clk    (clk),
+    .cs     (cs),
+    .ramaddr(ramaddr),
+    .ramin  (ramin),
+    .rwbar  (rwbar),
+    .ramout (ramout)
+  );
+
+  // Clock generation: 10 ns period
+  initial begin
+    clk = 0;
+    forever #5 clk = ~clk;
+  end
+
+  integer samples;
+  integer mismatches;
+
+  // Write procedure
+  task do_write;
+    input [5:0] a;
+    input [7:0] d;
+    begin
+      @(negedge clk);
+      cs      = 1'b1;
+      rwbar   = 1'b0;   // write
+      ramaddr = a;
+      ramin   = d;
+      @(posedge clk);   // perform write
+      @(negedge clk);
+      cs = 1'b0;
     end
+  endtask
 
-    // Test sequence
-    initial begin
-        // Initialize inputs
-        cs = 0;
-        ramaddr = 6'b0;
-        ramin = 8'b0;
-        rwbar = 1; // Start with read mode
+  // Read procedure
+  task do_read;
+    input [5:0] a;
+    input [7:0] exp;
+    reg   [7:0] q;
+    begin
+      @(negedge clk);
+      cs      = 1'b1;
+      rwbar   = 1'b1;   // read
+      ramaddr = a;
+      ramin   = 8'b0;
+      @(posedge clk);   // assume sync read, valid at posedge
+      @(negedge clk);
+      q = ramout;
 
-        // Test case 1: Write to memory
-        #10;
-        cs = 1;           // Enable chip select
-        ramaddr = 6'b000001; // Address 1
-        ramin = 8'b10101010; // Data to write
-        rwbar = 0;        // Set to write
-        #10;              // Wait for a clock edge
-
-        // Test case 2: Read from memory
-        ramaddr = 6'b000001; // Address 1
-        rwbar = 1;          // Set to read
-        #10;                // Wait for a clock edge
-        $display("Read from address %b: %b", ramaddr, ramout); // Check output
-
-        // Test case 3: Write to another memory location
-        ramaddr = 6'b000010;  // Address 2
-        ramin = 8'b11001100;  // Data to write
-        rwbar = 0;            // Set to write
-        #10;                  // Wait for a clock edge
-
-        // Test case 4: Read from the new address
-        ramaddr = 6'b000010; // Address 2
-        rwbar = 1;           // Set to read
-        #10;                 // Wait for a clock edge
-        $display("Read from address %b: %b", ramaddr, ramout); // Check output
-
-        // Test case 5: Chip select inactive
-        cs = 0;
-        #10; // Wait for a clock edge
-        $display("Chip select inactive, output: %b", ramout); // Should be 0
-        
-        // End of test
-        $finish;
-
-        
-$display("All test cases passed!");
-
+      samples = samples + 1;
+      if (q !== exp) begin
+        mismatches = mismatches + 1;
+        $display("READ MISMATCH @ t=%0t addr=%0d exp=%0h got=%0h",
+                  $time, a, exp, q);
+      end
+      cs = 1'b0;
     end
+  endtask
+
+  // Main test sequence
+  initial begin
+    cs      = 0;
+    ramaddr = 0;
+    ramin   = 0;
+    rwbar   = 1;
+    samples = 0;
+    mismatches = 0;
+
+    // wait some cycles
+    repeat (2) @(posedge clk);
+
+    // Case 1: write/read address 1
+    do_write(6'd1, 8'hAA);
+    do_read (6'd1, 8'hAA);
+
+    // Case 2: write/read address 2
+    do_write(6'd2, 8'hCC);
+    do_read (6'd2, 8'hCC);
+
+    // Case 3: chip select inactive (not counted)
+    @(negedge clk);
+    cs      = 0;
+    rwbar   = 1;
+    ramaddr = 6'd2;
+    ramin   = 8'h00;
+    @(posedge clk);
+
+    // Final summary for AutoChip parser
+    $display("SAMPLES=%0d MISMATCHES=%0d", samples, mismatches);
+    if (mismatches == 0) begin
+      $display("@@@PASS");
+      $finish;
+    end else begin
+      $display("@@@FAIL");
+      $finish;
+    end
+  end
+
 endmodule

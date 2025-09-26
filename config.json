@@ -1,13 +1,13 @@
 {
 	"general": {
-        "prompt": "./sram.v",
+        "prompt": "./sram.sv",
         "name": "top_module",
-        "testbench": "./sram_tb.v",
+        "testbench": "./sram_tb.sv",
 		"model_family": "ChatGPT",
 		"model_id": "gpt-4o-mini",
 		"num_candidates": 1,
 		"iterations": 1,
-        "outdir": "outputs_sram",
+        "outdir": "outputs_sram_sv",
         "log": "log.txt",
 		"ensemble": false
     }
